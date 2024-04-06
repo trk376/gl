@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * mit &Auml;nderungen von Jörg Prante
  *
  */
-public class KoelnerPhonetik implements StringEncoder {
+public class cKoelnerPhonetik implements StringEncoder {
 
     private static final String[] POSTEL_VARIATIONS_PATTERNS = { "AUN", "OWN", "RB", "RW", "WSK", "RSK" };
     private static final String[] POSTEL_VARIATIONS_REPLACEMENTS = { "OWN", "AUN", "RW", "RB", "RSK", "WSK" };

@@ -33,7 +33,7 @@ public class AnalysisKuromojiPlugin extends Plugin implements AnalysisPlugin {
         Map<String, AnalysisProvider<TokenFilterFactory>> extra = new HashMap<>();
         extra.put("kuromoji_baseform", KuromojiBaseFormFilterFactory::new);
         extra.put("kuromoji_part_of_speech", KuromojiPartOfSpeechFilterFactory::new);
-        extra.put("kuromoji_readingform", KuromojiReadingFormFilterFactory::new);
+        extra.put("kuromoji_readingform", (indexSettings, environment, name, settings) -> new KuromojiReadingFormFilterFactory(indexSettings, name, settings));
         extra.put("kuromoji_stemmer", KuromojiKatakanaStemmerFactory::new);
         extra.put("ja_stop", JapaneseStopTokenFilterFactory::new);
         extra.put("kuromoji_number", KuromojiNumberFilterFactory::new);
