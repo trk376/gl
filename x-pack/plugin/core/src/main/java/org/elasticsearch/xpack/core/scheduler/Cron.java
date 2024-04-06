@@ -1211,96 +1211,44 @@ public class Cron implements ToXContentFragment {
     }
 
     private void addToSet(int val, int end, int incr, int type) throws ElasticsearchParseException {
-
         TreeSet<Integer> set = getSet(type);
 
-        if (type == SECOND || type == MINUTE) {
-            if ((val < 0 || val > 59 || end > 59) && (val != ALL_SPEC_INT)) {
-                throw illegalArgument("Minute and Second values must be between 0 and 59");
+        validateValues(val, end, type);
+
+        addValuesToSet(val, end, incr, type, set);
+    }
+
+    private void validateValues(int val, int end, int type) throws ElasticsearchParseException {
+        switch (type) {
+            case SECOND, MINUTE -> validateRange(val, end, 0, 59, "Minute and Second values must be between 0 and 59");
+            case HOUR -> validateRange(val, end, 0, 23, "Hour values must be between 0 and 23");
+            case DAY_OF_MONTH -> validateRange(val, end, 1, 31, "Day of month values must be between 1 and 31");
+            case MONTH -> validateRange(val, end, 1, 12, "Month values must be between 1 and 12");
+            case DAY_OF_WEEK -> validateRange(val, end, 1, 7, "Day-of-Week values must be between 1 and 7");
+            case YEAR -> {
+                if (val > end) {
+                    throw illegalArgument("Start year must be less than stop year");
+                }
             }
-        } else if (type == HOUR) {
-            if ((val < 0 || val > 23 || end > 23) && (val != ALL_SPEC_INT)) {
-                throw illegalArgument("Hour values must be between 0 and 23");
-            }
-        } else if (type == DAY_OF_MONTH) {
-            if ((val < 1 || val > 31 || end > 31) && (val != ALL_SPEC_INT) && (val != NO_SPEC_INT)) {
-                throw illegalArgument("Day of month values must be between 1 and 31");
-            }
-        } else if (type == MONTH) {
-            if ((val < 1 || val > 12 || end > 12) && (val != ALL_SPEC_INT)) {
-                throw illegalArgument("Month values must be between 1 and 12");
-            }
-        } else if (type == DAY_OF_WEEK) {
-            if ((val == 0 || val > 7 || end > 7) && (val != ALL_SPEC_INT) && (val != NO_SPEC_INT)) {
-                throw illegalArgument("Day-of-Week values must be between 1 and 7");
-            }
+            default -> throw new IllegalArgumentException("Unexpected type encountered");
         }
+    }
 
-        if ((incr == 0 || incr == -1) && val != ALL_SPEC_INT) {
-            if (val != -1) {
-                set.add(val);
-            } else {
-                set.add(NO_SPEC);
-            }
-
-            return;
+    private void validateRange(int val, int end, int minValue, int maxValue, String errorMessage) throws ElasticsearchParseException {
+        if ((val < minValue || val > maxValue || end > maxValue) && (val != ALL_SPEC_INT) && (val != NO_SPEC_INT)) {
+            throw illegalArgument(errorMessage);
         }
+    }
 
+    private void addValuesToSet(int val, int end, int incr, int type, TreeSet<Integer> set) {
         int startAt = val;
         int stopAt = end;
 
         if (val == ALL_SPEC_INT && incr <= 0) {
             incr = 1;
-            set.add(ALL_SPEC); // put in a marker, but also fill values
+            set.add(ALL_SPEC);
         }
 
-        if (type == SECOND || type == MINUTE) {
-            if (stopAt == -1) {
-                stopAt = 59;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 0;
-            }
-        } else if (type == HOUR) {
-            if (stopAt == -1) {
-                stopAt = 23;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 0;
-            }
-        } else if (type == DAY_OF_MONTH) {
-            if (stopAt == -1) {
-                stopAt = 31;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 1;
-            }
-        } else if (type == MONTH) {
-            if (stopAt == -1) {
-                stopAt = 12;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 1;
-            }
-        } else if (type == DAY_OF_WEEK) {
-            if (stopAt == -1) {
-                stopAt = 7;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 1;
-            }
-        } else if (type == YEAR) {
-            if (stopAt == -1) {
-                stopAt = MAX_YEAR;
-            }
-            if (startAt == -1 || startAt == ALL_SPEC_INT) {
-                startAt = 1970;
-            }
-        }
-
-        // if the end of the range is before the start, then we need to overflow into
-        // the next day, month etc. This is done by adding the maximum amount for that
-        // type, and using modulus max to determine the value being added.
         int max = -1;
         if (stopAt < startAt) {
             max = switch (type) {
@@ -1318,13 +1266,13 @@ public class Cron implements ToXContentFragment {
 
         for (int i = startAt; i <= stopAt; i += incr) {
             if (max == -1) {
-                // ie: there's no max to overflow over
+                // Il n'y a pas de dépassement de plage
                 set.add(i);
             } else {
-                // take the modulus to get the real value
+                // Appliquer le modulo pour obtenir la vraie valeur
                 int i2 = i % max;
 
-                // 1-indexed ranges should not include 0, and should include their max
+                // Les plages indexées à partir de 1 ne doivent pas inclure 0, et doivent inclure leur maximum
                 if (i2 == 0 && (type == MONTH || type == DAY_OF_WEEK || type == DAY_OF_MONTH)) {
                     i2 = max;
                 }
@@ -1333,6 +1281,9 @@ public class Cron implements ToXContentFragment {
             }
         }
     }
+
+
+
 
     private TreeSet<Integer> getSet(int type) {
         return switch (type) {
