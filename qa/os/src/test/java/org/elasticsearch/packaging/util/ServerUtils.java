@@ -59,14 +59,17 @@ import static org.hamcrest.Matchers.is;
 public class ServerUtils {
 
     private static final Logger logger = LogManager.getLogger(ServerUtils.class);
-
+    private static final int WAIT_TIME = 3;
+    private static final int TIMEOUT_LENGTH = 30;
+    private static final int REQUEST_INTERVAL = 5;
+    private static final int DOCKER_WAIT_4SECURITY_INDEX = 25;
     private static String SECURITY_DISABLED = "xpack.security.enabled: false";
 
     // generous timeout as nested virtualization can be quite slow ...
-    private static final long waitTime = TimeUnit.MINUTES.toMillis(3);
-    private static final long timeoutLength = TimeUnit.SECONDS.toMillis(30);
-    private static final long requestInterval = TimeUnit.SECONDS.toMillis(5);
-    private static final long dockerWaitForSecurityIndex = TimeUnit.SECONDS.toMillis(25);
+    private static final long waitTime = TimeUnit.MINUTES.toMillis(WAIT_TIME);
+    private static final long timeoutLength = TimeUnit.SECONDS.toMillis(TIMEOUT_LENGTH);
+    private static final long requestInterval = TimeUnit.SECONDS.toMillis(REQUEST_INTERVAL);
+    private static final long dockerWaitForSecurityIndex = TimeUnit.SECONDS.toMillis(DOCKER_WAIT_4SECURITY_INDEX);
 
     public static void waitForElasticsearch(Installation installation) throws Exception {
         final boolean securityEnabled;
