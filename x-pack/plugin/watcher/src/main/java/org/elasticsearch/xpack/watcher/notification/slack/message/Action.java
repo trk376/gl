@@ -20,15 +20,6 @@ import java.util.Objects;
 
 public class Action implements MessageElement {
 
-    static final ObjectParser<Template, Void> ACTION_PARSER = new ObjectParser<>("action", Template::new);
-    static {
-        ACTION_PARSER.declareField(Template::setType, (p, c) -> new TextTemplate(p.text()), new ParseField("type"), ValueType.STRING);
-        ACTION_PARSER.declareField(Template::setUrl, (p, c) -> new TextTemplate(p.text()), new ParseField("url"), ValueType.STRING);
-        ACTION_PARSER.declareField(Template::setText, (p, c) -> new TextTemplate(p.text()), new ParseField("text"), ValueType.STRING);
-        ACTION_PARSER.declareField(Template::setStyle, (p, c) -> new TextTemplate(p.text()), new ParseField("style"), ValueType.STRING);
-        ACTION_PARSER.declareField(Template::setName, (p, c) -> new TextTemplate(p.text()), new ParseField("name"), ValueType.STRING);
-    }
-
     private static final ParseField URL = new ParseField("url");
     private static final ParseField TYPE = new ParseField("type");
     private static final ParseField TEXT = new ParseField("text");
@@ -49,6 +40,15 @@ public class Action implements MessageElement {
         this.type = type;
         this.text = text;
         this.url = url;
+    }
+
+    static final ObjectParser<Template, Void> ACTION_PARSER = new ObjectParser<>("action", Template::new);
+    static {
+        ACTION_PARSER.declareField(Template::setType, (p, c) -> new TextTemplate(p.text()), new ParseField("type"), ValueType.STRING);
+        ACTION_PARSER.declareField(Template::setUrl, (p, c) -> new TextTemplate(p.text()), new ParseField("url"), ValueType.STRING);
+        ACTION_PARSER.declareField(Template::setText, (p, c) -> new TextTemplate(p.text()), new ParseField("text"), ValueType.STRING);
+        ACTION_PARSER.declareField(Template::setStyle, (p, c) -> new TextTemplate(p.text()), new ParseField("style"), ValueType.STRING);
+        ACTION_PARSER.declareField(Template::setName, (p, c) -> new TextTemplate(p.text()), new ParseField("name"), ValueType.STRING);
     }
 
     @Override
