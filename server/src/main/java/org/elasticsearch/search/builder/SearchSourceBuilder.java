@@ -131,7 +131,7 @@ public final class SearchSourceBuilder implements Writeable, ToXContentObject, R
         return new HighlightBuilder();
     }
 
-    private QueryBuilder queryBuilder;
+
 
     private QueryBuilder postQueryBuilder;
 
