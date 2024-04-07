@@ -551,7 +551,7 @@ public abstract class AggregatorTestCase extends ESTestCase {
         );
         C root = createAggregator(builder, context);
 
-        if (splitLeavesIntoSeparateAggregators && searcher.getIndexReader().leaves().size() > 0) {
+        if (splitLeavesIntoSeparateAggregators && !searcher.getIndexReader().leaves().isEmpty()) {
             assertThat(ctx, instanceOf(CompositeReaderContext.class));
             final CompositeReaderContext compCTX = (CompositeReaderContext) ctx;
             final int size = compCTX.leaves().size();

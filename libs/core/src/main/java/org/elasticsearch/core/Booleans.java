@@ -63,7 +63,7 @@ public final class Booleans {
     }
 
     private static boolean hasText(CharSequence str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
         int strLen = str.length();

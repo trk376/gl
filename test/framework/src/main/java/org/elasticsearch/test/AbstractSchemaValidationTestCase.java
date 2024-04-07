@@ -53,7 +53,7 @@ public abstract class AbstractSchemaValidationTestCase<T extends ToXContent> ext
         JsonSchema jsonSchema = factory.getSchema(mapper.readTree(Files.newInputStream(p)), config);
 
         // ensure the schema meets certain criteria like not empty, strictness
-        assertTrue("found empty schema", jsonSchema.getValidators().size() > 0);
+        assertTrue("found empty schema", !jsonSchema.getValidators().isEmpty());
         assertTrue("schema lacks at least 1 required field", jsonSchema.hasRequiredValidator());
         assertSchemaStrictness(jsonSchema.getValidators().values(), jsonSchema.getSchemaPath());
 

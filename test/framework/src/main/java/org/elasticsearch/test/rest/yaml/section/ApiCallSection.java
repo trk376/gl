@@ -66,7 +66,7 @@ public class ApiCallSection {
     }
 
     public boolean hasBody() {
-        return bodies.size() > 0;
+        return !bodies.isEmpty();
     }
 
     /**

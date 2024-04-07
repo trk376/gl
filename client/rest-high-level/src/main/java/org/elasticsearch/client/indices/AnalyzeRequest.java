@@ -306,10 +306,10 @@ public class AnalyzeRequest implements Validatable, ToXContentObject {
         if (tokenizer != null) {
             builder.field("tokenizer", tokenizer);
         }
-        if (tokenFilters.size() > 0) {
+        if (!tokenFilters.isEmpty()) {
             builder.field("filter", tokenFilters);
         }
-        if (charFilters.size() > 0) {
+        if (!charFilters.isEmpty()) {
             builder.field("char_filter", charFilters);
         }
         if (Strings.isNullOrEmpty(field) == false) {

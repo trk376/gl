@@ -467,7 +467,7 @@ public abstract class AbstractHttpServerTransport extends AbstractLifecycleCompo
         Exception badRequestCause,
         Set<String> failedHeaderNames
     ) {
-        assert failedHeaderNames.size() > 0;
+        assert !failedHeaderNames.isEmpty();
         HttpRequest httpRequestWithoutContentType = httpRequest;
         for (String failedHeaderName : failedHeaderNames) {
             httpRequestWithoutContentType = httpRequestWithoutContentType.removeHeader(failedHeaderName);

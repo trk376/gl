@@ -201,7 +201,7 @@ public abstract class AbstractHttpFixture {
             this.body = Objects.requireNonNull(body);
 
             final Map<String, String> params = new HashMap<>();
-            if (uri.getQuery() != null && uri.getQuery().length() > 0) {
+            if (uri.getQuery() != null && !uri.getQuery().isEmpty()) {
                 for (String param : uri.getQuery().split("&")) {
                     int i = param.indexOf("=");
                     if (i > 0) {
