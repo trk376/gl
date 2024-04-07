@@ -36,7 +36,7 @@ import java.util.Set;
  */
 class InjectionRequestProcessor extends AbstractProcessor {
 
-    private final List<StaticInjection> staticInjections = new ArrayList<>();
+    private final List<StaticInjectionProvider> staticInjectionProviders = new ArrayList<>();
     private final Initializer initializer;
 
     InjectionRequestProcessor(Errors errors, Initializer initializer) {
@@ -46,7 +46,7 @@ class InjectionRequestProcessor extends AbstractProcessor {
 
     @Override
     public Boolean visit(StaticInjectionRequest request) {
-        staticInjections.add(new StaticInjection(injector, request));
+        staticInjectionProviders.add(new StaticInjectionProviderImpl(injector, request));
         return true;
     }
 
@@ -65,58 +65,63 @@ class InjectionRequestProcessor extends AbstractProcessor {
     }
 
     public void validate() {
-        for (StaticInjection staticInjection : staticInjections) {
-            staticInjection.validate();
+        for (StaticInjectionProvider provider : staticInjectionProviders) {
+            provider.validate();
         }
     }
 
     public void injectMembers() {
-        for (StaticInjection staticInjection : staticInjections) {
-            staticInjection.injectMembers();
-        }
-    }
-
-    /**
-     * A requested static injection.
-     */
-    private class StaticInjection {
-        final InjectorImpl injector;
-        final Object source;
-        final StaticInjectionRequest request;
-        List<SingleMemberInjector> memberInjectors;
-
-        StaticInjection(InjectorImpl injector, StaticInjectionRequest request) {
-            this.injector = injector;
-            this.source = request.getSource();
-            this.request = request;
-        }
-
-        void validate() {
-            Errors errorsForMember = errors.withSource(source);
-            Set<InjectionPoint> injectionPoints;
-            try {
-                injectionPoints = request.getInjectionPoints();
-            } catch (ConfigurationException e) {
-                errors.merge(e.getErrorMessages());
-                injectionPoints = e.getPartialValue();
-            }
-            memberInjectors = injector.membersInjectorStore.getInjectors(injectionPoints, errorsForMember);
-        }
-
-        void injectMembers() {
-            try {
-                injector.callInContext(new ContextualCallable<Void>() {
-                    @Override
-                    public Void call(InternalContext context) {
-                        for (SingleMemberInjector injector : memberInjectors) {
-                            injector.inject(errors, context, null);
-                        }
-                        return null;
-                    }
-                });
-            } catch (ErrorsException e) {
-                throw new AssertionError();
-            }
+        for (StaticInjectionProvider provider : staticInjectionProviders) {
+            provider.injectMembers();
         }
     }
 }
+
+interface StaticInjectionProvider {
+    void validate();
+    void injectMembers();
+}
+class StaticInjectionProviderImpl implements StaticInjectionProvider {
+    private final InjectorImpl injector;
+    private final Object source;
+    private final StaticInjectionRequest request;
+    private List<SingleMemberInjector> memberInjectors;
+
+    StaticInjectionProviderImpl(InjectorImpl injector, StaticInjectionRequest request) {
+        this.injector = injector;
+        this.source = request.getSource();
+        this.request = request;
+    }
+
+    @Override
+    public void validate() {
+        Errors errorsForMember = errors.withSource(source);
+        Set<InjectionPoint> injectionPoints;
+        try {
+            injectionPoints = request.getInjectionPoints();
+        } catch (ConfigurationException e) {
+            errors.merge(e.getErrorMessages());
+            injectionPoints = e.getPartialValue();
+        }
+        memberInjectors = injector.membersInjectorStore.getInjectors(injectionPoints, errorsForMember);
+    }
+
+    @Override
+    public void injectMembers() {
+        try {
+            injector.callInContext(new ContextualCallable<Void>() {
+                @Override
+                public Void call(InternalContext context) {
+                    for (SingleMemberInjector injector : memberInjectors) {
+                        injector.inject(errors, context, null);
+                    }
+                    return null;
+                }
+            });
+        } catch (ErrorsException e) {
+            throw new AssertionError();
+        }
+    }
+}
+
+
